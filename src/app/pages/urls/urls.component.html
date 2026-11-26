@@ -1,0 +1,55 @@
+<div class="urls-container">
+  <h1>Your URLs</h1>
+
+  @if (urlService.loading()) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (urlService.error()) {
+    <div class="message error">{{ urlService.error() }}</div>
+  }
+
+  @if (!urlService.loading() && urlService.urls().length === 0) {
+    <div class="empty-state">
+      <p>No URLs shortened yet. Go to the <a routerLink="/">home page</a> to create one.</p>
+    </div>
+  }
+
+  <div class="url-list">
+    @for (url of urlService.urls(); track url.id) {
+      <div class="url-card" [class.expired]="isExpired(url.expiresAt)">
+        <div class="url-card-header">
+          <a [href]="url.shortUrl" target="_blank" class="short-url">{{ url.shortUrl }}</a>
+          <button (click)="copyUrl(url.shortUrl, url.shortCode)" class="btn-copy">
+            @if (copiedCode() === url.shortCode) {
+              Copied!
+            } @else {
+              Copy
+            }
+          </button>
+        </div>
+
+        <a [href]="url.originalUrl" target="_blank" rel="noopener" class="original-url">
+          {{ url.originalUrl }}
+        </a>
+
+        <div class="url-meta">
+          <span>Created: {{ url.createdAt | date:'medium' }}</span>
+          @if (url.expiresAt) {
+            <span>
+              @if (isExpired(url.expiresAt)) {
+                Expired: {{ url.expiresAt | date:'medium' }}
+              } @else {
+                Expires: {{ url.expiresAt | date:'medium' }}
+              }
+            </span>
+          }
+        </div>
+
+        @if (isExpired(url.expiresAt)) {
+          <span class="badge-expired">Expired</span>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,59 @@
+<div class="home-container">
+  <div class="hero">
+    <h1>URL Shortener</h1>
+    <p>Paste a long URL and get a short, shareable link instantly.</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="shorten-form">
+    <div class="input-group">
+      <input
+        type="url"
+        formControlName="longUrl"
+        placeholder="https://example.com/your-very-long-url"
+        class="url-input"
+      />
+      <button type="submit" [disabled]="form.invalid || urlService.loading()" class="btn-shorten">
+        @if (urlService.loading()) {
+          <span class="spinner"></span>
+          Shortening...
+        } @else {
+          Shorten URL
+        }
+      </button>
+    </div>
+
+    @if (form.get('longUrl')?.touched && form.get('longUrl')?.invalid) {
+      <p class="error-text">Please enter a valid HTTP or HTTPS URL.</p>
+    }
+  </form>
+
+  @if (urlService.error()) {
+    <div class="message error">{{ urlService.error() }}</div>
+  }
+
+  @if (result()) {
+    <div class="result-card">
+      <p class="result-label">Your shortened URL:</p>
+      <div class="result-url-row">
+        <a [href]="result()!.shortUrl" target="_blank" class="result-url">{{ result()!.shortUrl }}</a>
+        <button (click)="copyToClipboard()" class="btn-copy">
+          @if (copied()) {
+            Copied!
+          } @else {
+            Copy
+          }
+        </button>
+      </div>
+      <p class="original-url">Original: {{ result()!.originalUrl }}</p>
+
+      @if (!authService.isLoggedIn()) {
+        <div class="ttl-warning">
+          This link will expire in {{ ttlHours() }} hour{{ ttlHours() > 1 ? 's' : '' }}.
+        </div>
+        <div class="register-prompt">
+          Want to keep your URLs forever? <a routerLink="/login">Register or sign in</a> to save and manage them.
+        </div>
+      }
+    </div>
+  }
+</div>
